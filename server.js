@@ -116,6 +116,9 @@ const timedtr = require("./routes/student/dtr/timedtr");
 const changepass = require("./routes/student/changepass/changepass");
 const upload = require("./routes/student/fileupload/cloudinaryupload");
 
+//company
+const internattendance = require("./routes/company/interns_attendace/internAttendance");
+
 // Routes
 app.use("/api/add-admin", addadmin(db));
 //Admin API's
@@ -165,6 +168,8 @@ app.use("/api/student-homedetails", homeds(db));
 app.use("/api/studentchangepass", changepass(db));
 app.use("/documents", upload(db));
 
+//company side API'S
+app.use("/api/intern-attendance", internattendance(db));
 // Default route
 app.get("/", (req, res) => {
   res.send("Welcome to the Express MySQL Backend!");
