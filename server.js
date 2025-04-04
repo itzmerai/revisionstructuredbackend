@@ -120,6 +120,7 @@ const upload = require("./routes/student/fileupload/cloudinaryupload");
 const internattendance = require("./routes/company/interns_attendace/internAttendance");
 const internReport = require("./routes/company/reports/internsAttendanceReport");
 const internDocumentation = require("./routes/company/reports/internDocumentation");
+const companyAnnouncement = require ("./routes/company/coordinatorAnnouncement/coordinatorAnnouncement");
 
 // Routes
 app.use("/api/add-admin", addadmin(db));
@@ -174,6 +175,7 @@ app.use("/documents", upload(db));
 app.use("/api/intern-attendance", internattendance(db));
 app.use("/api/intern-report", internReport(db));
 app.use("/api/intern-documentation", internDocumentation(db));
+app.use("/api/company-announcement",companyAnnouncement(db));
 
 // Default route
 app.get("/", (req, res) => {
