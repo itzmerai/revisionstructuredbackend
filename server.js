@@ -121,6 +121,7 @@ const internattendance = require("./routes/company/interns_attendace/internAtten
 const internReport = require("./routes/company/reports/internsAttendanceReport");
 const internDocumentation = require("./routes/company/reports/internDocumentation");
 const companyAnnouncement = require ("./routes/company/coordinatorAnnouncement/coordinatorAnnouncement");
+const interns = require("./routes/company/interns/interns");
 
 // Routes
 app.use("/api/add-admin", addadmin(db));
@@ -176,6 +177,7 @@ app.use("/api/intern-attendance", internattendance(db));
 app.use("/api/intern-report", internReport(db));
 app.use("/api/intern-documentation", internDocumentation(db));
 app.use("/api/company-announcement",companyAnnouncement(db));
+app.use("/api/interns", interns(db));
 
 // Default route
 app.get("/", (req, res) => {
