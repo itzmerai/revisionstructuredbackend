@@ -122,6 +122,9 @@ const internReport = require("./routes/company/reports/internsAttendanceReport")
 const internDocumentation = require("./routes/company/reports/internDocumentation");
 const companyAnnouncement = require ("./routes/company/coordinatorAnnouncement/coordinatorAnnouncement");
 const interns = require("./routes/company/interns/interns");
+const recentinterns = require("./routes/company/dashboard/recentstudent");
+const companygreet = require("./routes/company/dashboard/welcomeCompany");
+const countinterns = require("./routes/company/dashboard/companyinterns");
 
 // Routes
 app.use("/api/add-admin", addadmin(db));
@@ -178,7 +181,9 @@ app.use("/api/intern-report", internReport(db));
 app.use("/api/intern-documentation", internDocumentation(db));
 app.use("/api/company-announcement",companyAnnouncement(db));
 app.use("/api/interns", interns(db));
-
+app.use("/api/recent-interns",recentinterns(db));
+app.use("/api/companygreet", companygreet(db));
+app.use("/api/count-interns", countinterns(db));
 // Default route
 app.get("/", (req, res) => {
   res.send("Welcome to the Express MySQL Backend!");
