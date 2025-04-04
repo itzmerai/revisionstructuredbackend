@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  app:
+    image: structured_backend
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - DB_HOST=bgnitjpmfxdrwlbwjhpg-mysql.services.clever-cloud.com
+      - DB_USER=ulwgmaqxj1j6oqle
+      - DB_PASSWORD=TmhLnfsniFS2ZJo20L2P
+      - DB_NAME=bgnitjpmfxdrwlbwjhpg
+      - PORT=5000
+      - CORS_ORIGIN=http://localhost:5173
+      - EMAIL=ojtmis2009@gmail.com
+      - EMAIL_PASSWORD=uhof ekam opdg mpyt
+      - CLOUDINARY_CLOUD_NAME=dvrltoeb4
+      - CLOUDINARY_API_KEY=764356671259976
+      - CLOUDINARY_API_SECRET=v25OUZsf5lZx2S8v-G3JbLUaS2o
