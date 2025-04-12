@@ -99,6 +99,7 @@ const annoucement = require("./routes/coordinator/announcements/veiwannoucement"
 const studentreport = require("./routes/coordinator/reports/studentreport");
 const timesheet = require("./routes/coordinator/attendance/timesheet");
 const fileUpload = require("./routes/coordinator/reports/studentfile");
+const studentrate = require("./routes/coordinator/task/studenttaskprogress");
 //coordinator dashboard
 const coordinatorcom = require("./routes/coordinator/dashboard/coordinatorcompany");
 const coordinatorstudent = require("./routes/coordinator/dashboard/coordinatorstudent");
@@ -123,10 +124,15 @@ const internDocumentation = require("./routes/company/reports/internDocumentatio
 const companyAnnouncement = require ("./routes/company/coordinatorAnnouncement/coordinatorAnnouncement");
 const interns = require("./routes/company/interns/interns");
 const recentinterns = require("./routes/company/dashboard/recentstudent");
+const counttask = require("./routes/company/dashboard/counttask");
 const companygreet = require("./routes/company/dashboard/welcomeCompany");
+const comname = require("./routes/company/dashboard/companyname");
 const countinterns = require("./routes/company/dashboard/companyinterns");
 const idletime = require('./routes/company/buytime/addtime');
-
+const tasker = require("./routes/company/task/tasker");
+const taskprogress = require("./routes/company/task/taskprogress");
+const companyprofile = require("./routes/company/dashboard/companyprofile");
+const taskdestribution = require("./routes/company/dashboard/taskdestribution");
 // Routes
 app.use("/api/add-admin", addadmin(db));
 //Admin API's
@@ -166,6 +172,7 @@ app.use("/api/reportstudent", studentreport(db));
 app.use("/api/coordinatorwc", wcmessage(db));
 app.use('/api/company-distribution', companydestributionchart(db));
 app.use("/",fileUpload(db));
+app.use("/", studentrate(db));
 
 //student side API's
 app.use("/api/student-timesheets", timedtr(db));
@@ -184,8 +191,15 @@ app.use("/api/company-announcement",companyAnnouncement(db));
 app.use("/api/interns", interns(db));
 app.use("/api/recent-interns",recentinterns(db));
 app.use("/api/companygreet", companygreet(db));
+app.use("/api/comname", comname(db));
 app.use("/api/count-interns", countinterns(db));
+app.use("/api/count-task", counttask(db));
+app.use("/api/task-distribution", taskdestribution(db));
 app.use("/api/idletime", idletime(db));
+app.use("/api/company-profile", companyprofile(db));
+app.use("/api", tasker(db));
+app.use("/api", taskprogress(db));
+
 // Default route
 app.get("/", (req, res) => {
   res.send("Welcome to the Express MySQL Backend!");

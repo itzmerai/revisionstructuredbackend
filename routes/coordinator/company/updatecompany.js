@@ -9,7 +9,6 @@ module.exports = (db) => {
       company_address,
       company_mentor,
       company_contact,
-      company_description,
       company_email
     } = req.body;
 
@@ -20,7 +19,6 @@ module.exports = (db) => {
         !company_address ||
         !company_mentor ||
         !company_contact ||
-        !company_description ||
         !company_email
       ) {
         return res.status(400).json({ message: "All fields are required." });
@@ -33,7 +31,6 @@ module.exports = (db) => {
           company_address = ?, 
           company_mentor = ?, 
           company_contact = ?, 
-          company_description = ?, 
           company_email = ?
         WHERE company_id = ?
       `;
@@ -43,7 +40,6 @@ module.exports = (db) => {
         company_address,
         company_mentor,
         company_contact,
-        company_description,
         company_email,
         company_id,
       ]);

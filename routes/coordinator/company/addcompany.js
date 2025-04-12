@@ -8,7 +8,6 @@ module.exports = (db) => {
       coordinator_id,
       company_name,
       company_address,
-      company_description,
       company_mentor,
       company_contact,
       company_email
@@ -20,7 +19,6 @@ module.exports = (db) => {
         !coordinator_id ||
         !company_name ||
         !company_address ||
-        !company_description ||
         !company_mentor ||
         !company_contact ||
         !company_email
@@ -44,15 +42,14 @@ module.exports = (db) => {
       // Insert into database
       const query = `
         INSERT INTO company 
-        (coordinator_id, company_name, company_address, company_description, company_mentor, company_contact, company_email, company_user, company_password)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (coordinator_id, company_name, company_address, company_mentor, company_contact, company_email, company_user, company_password)
+        VALUES (?, ?, ?, ?, ?, ?, ?,?)
       `;
 
       const [result] = await db.query(query, [
         coordinator_id,
         company_name,
         company_address,
-        company_description,
         company_mentor,
         company_contact,
         company_email,

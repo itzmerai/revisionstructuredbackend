@@ -38,17 +38,17 @@ module.exports = (db) => {
         });
       }
 
-      // Check student
-      const [studentResults] = await db.query(
-        "SELECT * FROM student WHERE student_schoolid = ? AND student_password = ?",
+      // Check company
+      const [companyResults] = await db.query(
+        "SELECT * FROM company WHERE company_user = ? AND company_password = ?",
         [username, password]
       );
-      if (studentResults.length > 0) {
-        const student = studentResults[0];
+      if (companyResults.length > 0) {
+        const company = companyResults[0];
         return res.status(200).json({
-          message: "Student logged in",
-          role: "student",
-          user: { student_id: student.student_id, ...student },
+          message: "Company logged in",
+          role: "company",
+          user: { company_id: company.company_id, ...company },
         });
       }
 

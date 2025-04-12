@@ -19,10 +19,10 @@ module.exports = (db) => {
           a.announcement_content 
         FROM announce a
         INNER JOIN company c ON a.coordinator_id = c.coordinator_id
-        WHERE c.company_id = ?;
+        WHERE c.company_id = ?
+        ORDER BY a.announcement_date DESC;
       `;
 
-      // Execute query and destructure results from array
       const [results] = await db.query(query, [company_id]);
       res.status(200).json(results);
     } catch (err) {

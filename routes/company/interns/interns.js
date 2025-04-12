@@ -21,6 +21,7 @@ module.exports = (db) => {
           COALESCE(os.time_status, 'Pending') AS student_status,
           s.student_email, 
           s.student_schoolid,
+          COALESCE(os.rendered_time, 0) AS rendered_time,
           c.company_name, 
           c.company_mentor 
         FROM student s

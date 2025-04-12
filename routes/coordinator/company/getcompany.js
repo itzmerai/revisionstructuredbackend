@@ -14,7 +14,8 @@ module.exports = (db) => {
           company_name, 
           company_address, 
           company_mentor, 
-          company_contact 
+          company_contact,
+          company_email
         FROM company 
         WHERE coordinator_id = ?
       `;
