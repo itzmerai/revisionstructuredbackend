@@ -102,15 +102,15 @@ module.exports = (db) => {
         }
 
         const programHours = programResult[0].program_hours;
-        const remainingTime = programHours - newRenderedTime;
-        const timeStatus = remainingTime <= 0 ? "Completed" : "Ongoing";
+        const remainingTime = Math.max(0, programHours - newRenderedTime);
+        const timeStatus = remainingTime === 0 ? "Completed" : "Ongoing";
 
         await db.query(
           "UPDATE ojt_status SET rendered_time = ?, remaining_time = ?, time_status = ? WHERE student_id = ?",
           [newRenderedTime, remainingTime, timeStatus, studentId]
         );
 
-        if (timeStatus === "Completed" || remainingTime <= 0) {
+        if (timeStatus === "Completed") {
           await db.query("UPDATE student SET student_status = 'Inactive' WHERE student_id = ?", [studentId]);
         }
       }
