@@ -116,7 +116,8 @@ const dailytime = require("./routes/student/time/timerecord");
 const timedtr = require("./routes/student/dtr/timedtr");
 const changepass = require("./routes/student/changepass/changepass");
 const upload = require("./routes/student/fileupload/cloudinaryupload");
-
+const assignedtask = require("./routes/student/task/interntasks");
+const taskupload = require("./routes/student/task/interntaskupload");
 //company
 const internattendance = require("./routes/company/interns_attendace/internAttendance");
 const internReport = require("./routes/company/reports/internsAttendanceReport");
@@ -182,6 +183,9 @@ app.use("/api/latest-announcement", latestannouncement(db));
 app.use("/api/student-homedetails", homeds(db));
 app.use("/api/studentchangepass", changepass(db));
 app.use("/documents", upload(db));
+app.use("/api", assignedtask(db));
+app.use("/api/task-uploads", taskupload(db));
+
 
 //company side API'S
 app.use("/api/intern-attendance", internattendance(db));

@@ -21,6 +21,8 @@ module.exports = (db) => {
         c.company_address, 
         c.company_mentor, 
         c.company_contact, 
+        c.company_email,
+        c.company_description,
         p.program_name, 
         sy.school_yr 
       FROM student s
