@@ -12,7 +12,7 @@ module.exports = (db) => {
       }
 
       const hoursToAdd = parseFloat(hours_added);
-      if (isNaN(hoursToAdd) || hoursToAdd <= 0) {
+      if (isNaN(hoursToAdd)) {
         return res.status(400).json({ error: "Invalid hours value" });
       }
 
@@ -31,7 +31,7 @@ module.exports = (db) => {
 
       const programHours = parseFloat(programQuery[0].program_hours);
 
-      // Check existing status
+      // Check existing OJT status
       const [statusResult] = await db.query(
         "SELECT * FROM ojt_status WHERE student_id = ?",
         [student_id]
@@ -40,9 +40,18 @@ module.exports = (db) => {
       let renderedTime, remainingTime, timeStatus;
 
       if (statusResult.length === 0) {
-        // New record
+        // New record validation
+        if (hoursToAdd <= 0) {
+          return res.status(400).json({ error: "Hours must be greater than 0" });
+        }
+        if (hoursToAdd > programHours) {
+          return res.status(400).json({ 
+            error: `Cannot add more hours than program requirement (${programHours}hrs)` 
+          });
+        }
+
         renderedTime = hoursToAdd;
-        remainingTime = Math.max(programHours - hoursToAdd, 0);
+        remainingTime = programHours - hoursToAdd;
         timeStatus = remainingTime <= 0 ? "Completed" : "Ongoing";
 
         await db.query(
@@ -50,12 +59,24 @@ module.exports = (db) => {
           [student_id, renderedTime, remainingTime, timeStatus]
         );
       } else {
-        // Update existing
-        const currentRendered = parseFloat(statusResult[0].rendered_time) || 0;
-        const currentRemaining = parseFloat(statusResult[0].remaining_time) || programHours;
+        // Existing record
+        const currentRendered = parseFloat(statusResult[0].rendered_time);
+        const currentRemaining = parseFloat(statusResult[0].remaining_time);
+
+        if (currentRemaining <= 0) {
+          return res.status(400).json({ error: "No remaining time left" });
+        }
+        if (hoursToAdd <= 0) {
+          return res.status(400).json({ error: "Hours must be greater than 0" });
+        }
+        if (hoursToAdd > currentRemaining) {
+          return res.status(400).json({ 
+            error: `Cannot add more hours than remaining time (${currentRemaining}hrs)` 
+          });
+        }
 
         renderedTime = currentRendered + hoursToAdd;
-        remainingTime = Math.max(currentRemaining - hoursToAdd, 0);
+        remainingTime = currentRemaining - hoursToAdd;
         timeStatus = remainingTime <= 0 ? "Completed" : "Ongoing";
 
         await db.query(
@@ -72,13 +93,12 @@ module.exports = (db) => {
         );
       }
 
-      // Return formatted response
       res.json({
         success: true,
         message: "Time added successfully",
         student_id,
-        rendered_time: renderedTime, // Return as number
-        remaining_time: remainingTime, // Return as number
+        rendered_time: renderedTime,
+        remaining_time: remainingTime,
         time_status: timeStatus
       });
 
