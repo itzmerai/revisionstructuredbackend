@@ -223,7 +223,7 @@ app.get("/api/check-email", async (req, res) => {
     res.json({ exists: results.length > 0 });
   } catch (error) {
     console.error("Error checking email:", error);
-    res.status(500).json({ error: "Failed to check email availability." });
+    res.status(500).json({ error: "Failed to check email availabilitys." });
   }
 });
 if (require.main === module) {
