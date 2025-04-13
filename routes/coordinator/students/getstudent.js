@@ -15,6 +15,7 @@ module.exports = (db) => {
           s.student_contact,
           s.student_sex, 
           COALESCE(os.time_status, 'Pending') AS student_status,
+          COALESCE(os.remaining_time, 'Pending') AS student_remaining_time,
           s.student_email, 
           s.student_schoolid,
           c.company_name, 
