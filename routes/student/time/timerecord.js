@@ -30,13 +30,14 @@ module.exports = (db) => {
       }
 
       const scanDate = new Date(scanTime);
-      scanDate.setHours(scanDate.getHours() + 8);
+      scanDate.setHours(scanDate.getHours() + 8); 
       const date = scanDate.toISOString().split("T")[0];
       const time = scanDate.toLocaleTimeString("en-US", {
         hour: "numeric",
         minute: "numeric",
-        hour12: true,
+        hour12: true, // Ensures 12-hour format with AM/PM
       });
+
 
       const [timesheetRows] = await db.query(
         "SELECT * FROM timesheet WHERE student_id = ? AND date = ?",
@@ -153,8 +154,7 @@ module.exports = (db) => {
         );
 
         const totalRendered = parseFloat(renderedResult[0].totalRendered) || 0;
-        // Cap remaining time at 0 to prevent negative values
-        const remainingTime = Math.max(0, programHours - totalRendered);
+        const remainingTime = programHours - totalRendered;
         const timeStatus = remainingTime <= 0 ? "Completed" : "Ongoing";
 
         const [existingStatus] = await db.query(
@@ -174,8 +174,8 @@ module.exports = (db) => {
           );
         }
 
-        // Update student status to Inactive if OJT is completed
-        if (timeStatus === "Completed") {
+        // Update student status to Inactive if conditions are met
+        if (timeStatus === "Completed" || remainingTime <= 0) {
           await db.query(
             "UPDATE student SET student_status = 'Inactive' WHERE student_id = ?",
             [studentId]
