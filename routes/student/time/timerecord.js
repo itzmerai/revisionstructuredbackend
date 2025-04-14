@@ -5,8 +5,13 @@ module.exports = (db) => {
   router.post("/", async (req, res) => {
     const { studentId, scanTime, address } = req.body;
 
-    if (!studentId || !scanTime || !address) {
-      return res.status(400).json({ error: "Student ID, scan time, and address are required" });
+    if (!address) {
+      return res.status(400).json({ error: "Address (location) is required" });
+    }
+    if (!studentId || !scanTime) {
+      return res
+        .status(400)
+        .json({ error: "Student ID and scan time are required" });
     }
 
     try {
@@ -27,7 +32,11 @@ module.exports = (db) => {
       const scanDate = new Date(scanTime);
       scanDate.setHours(scanDate.getHours() + 8);
       const date = scanDate.toISOString().split("T")[0];
-      const time = scanDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "numeric", hour12: true });
+      const time = scanDate.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+      });
 
       const [timesheetRows] = await db.query(
         "SELECT * FROM timesheet WHERE student_id = ? AND date = ?",
@@ -38,13 +47,24 @@ module.exports = (db) => {
         const timesheetEntry = timesheetRows[0];
         const updatedFields = {};
 
-        if (!timesheetEntry.am_in) updatedFields.am_in = time;
-        else if (!timesheetEntry.am_out) updatedFields.am_out = time;
-        else if (!timesheetEntry.pm_in) updatedFields.pm_in = time;
-        else if (!timesheetEntry.pm_out) updatedFields.pm_out = time;
-        else return res.status(400).json({ error: "All time slots for the day are filled" });
+        if (!timesheetEntry.am_in) {
+          updatedFields.am_in = time;
+        } else if (!timesheetEntry.am_out) {
+          updatedFields.am_out = time;
+        } else if (!timesheetEntry.pm_in) {
+          updatedFields.pm_in = time;
+        } else if (!timesheetEntry.pm_out) {
+          updatedFields.pm_out = time;
+        } else {
+          return res
+            .status(400)
+            .json({ error: "All time slots for the day are filled" });
+        }
 
-        await db.query("UPDATE timesheet SET ? WHERE time_id = ?", [updatedFields, timesheetEntry.time_id]);
+        await db.query("UPDATE timesheet SET ? WHERE time_id = ?", [
+          updatedFields,
+          timesheetEntry.time_id,
+        ]);
       } else {
         await db.query(
           "INSERT INTO timesheet (student_id, company_id, date, am_in, location, dailyrenderedtime) VALUES (?, ?, ?, ?, ?, ?)",
@@ -74,27 +94,51 @@ module.exports = (db) => {
         const calculateRenderedHours = (inTime, outTime) => {
           const inDecimal = parseTimeToDecimal(inTime);
           const outDecimal = parseTimeToDecimal(outTime);
-          if (inDecimal === null || outDecimal === null || inDecimal >= outDecimal) return 0;
+          if (
+            inDecimal === null ||
+            outDecimal === null ||
+            inDecimal >= outDecimal
+          )
+            return 0;
           return outDecimal - inDecimal;
         };
 
         const morningHours = calculateRenderedHours(entry.am_in, entry.am_out);
-        const afternoonHours = calculateRenderedHours(entry.pm_in, entry.pm_out);
+        const afternoonHours = calculateRenderedHours(
+          entry.pm_in,
+          entry.pm_out
+        );
         const totalHours = (morningHours + afternoonHours).toFixed(2);
 
-        await db.query("UPDATE timesheet SET dailyrenderedtime = ? WHERE time_id = ?", [totalHours, entry.time_id]);
-
-        const [statusResult] = await db.query(
-          "SELECT rendered_time FROM ojt_status WHERE student_id = ?",
-          [studentId]
+        await db.query(
+          "UPDATE timesheet SET dailyrenderedtime = ? WHERE time_id = ?",
+          [totalHours, entry.time_id]
         );
 
-        const previousRenderedTime = statusResult.length > 0 ? parseFloat(statusResult[0].rendered_time) : 0;
-        const newRenderedTime = previousRenderedTime + parseFloat(totalHours);
+        if (!coordinator_id) {
+          return res
+            .status(400)
+            .json({ error: "Student has no coordinator assigned" });
+        }
 
-        const [programResult] = await db.query(
-          "SELECT program_hours FROM program WHERE program_id = (SELECT program_id FROM coordinator WHERE coordinator_id = ?)",
+        const [coordinatorResult] = await db.query(
+          "SELECT program_id FROM coordinator WHERE coordinator_id = ?",
           [coordinator_id]
+        );
+
+        if (
+          coordinatorResult.length === 0 ||
+          !coordinatorResult[0].program_id
+        ) {
+          return res
+            .status(400)
+            .json({ error: "Coordinator program not found" });
+        }
+
+        const { program_id } = coordinatorResult[0];
+        const [programResult] = await db.query(
+          "SELECT program_hours FROM program WHERE program_id = ?",
+          [program_id]
         );
 
         if (programResult.length === 0) {
@@ -102,16 +146,40 @@ module.exports = (db) => {
         }
 
         const programHours = programResult[0].program_hours;
-        const remainingTime = Math.max(0, programHours - newRenderedTime);
-        const timeStatus = remainingTime === 0 ? "Completed" : "Ongoing";
 
-        await db.query(
-          "UPDATE ojt_status SET rendered_time = ?, remaining_time = ?, time_status = ? WHERE student_id = ?",
-          [newRenderedTime, remainingTime, timeStatus, studentId]
+        const [renderedResult] = await db.query(
+          "SELECT SUM(dailyrenderedtime) AS totalRendered FROM timesheet WHERE student_id = ?",
+          [studentId]
         );
 
+        const totalRendered = parseFloat(renderedResult[0].totalRendered) || 0;
+        // Cap remaining time at 0 to prevent negative values
+        const remainingTime = Math.max(0, programHours - totalRendered);
+        const timeStatus = remainingTime <= 0 ? "Completed" : "Ongoing";
+
+        const [existingStatus] = await db.query(
+          "SELECT * FROM ojt_status WHERE student_id = ?",
+          [studentId]
+        );
+
+        if (existingStatus.length > 0) {
+          await db.query(
+            "UPDATE ojt_status SET rendered_time = ?, remaining_time = ?, time_status = ? WHERE student_id = ?",
+            [totalRendered, remainingTime, timeStatus, studentId]
+          );
+        } else {
+          await db.query(
+            "INSERT INTO ojt_status (student_id, rendered_time, remaining_time, time_status) VALUES (?, ?, ?, ?)",
+            [studentId, totalRendered, remainingTime, timeStatus]
+          );
+        }
+
+        // Update student status to Inactive if OJT is completed
         if (timeStatus === "Completed") {
-          await db.query("UPDATE student SET student_status = 'Inactive' WHERE student_id = ?", [studentId]);
+          await db.query(
+            "UPDATE student SET student_status = 'Inactive' WHERE student_id = ?",
+            [studentId]
+          );
         }
       }
 
@@ -121,6 +189,5 @@ module.exports = (db) => {
       res.status(500).json({ error: "Internal server error" });
     }
   });
-
   return router;
 };
