@@ -105,7 +105,7 @@ module.exports = (db) => {
         `Login Credentials:\n` +
         `Username: ${coordinator_user}\n` +
         `Password: ${coordinator_pass}\n\n` +
-        `Please change your password upon first login for security purposes.\n\n` +
+        `Log In: https://revisionwebappfrontend.vercel.app.\n\n` +
         `Best Regards,\nAdmin Team`;
 
       // Send email

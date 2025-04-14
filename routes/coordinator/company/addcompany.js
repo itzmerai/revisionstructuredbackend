@@ -68,7 +68,7 @@ module.exports = (db) => {
         - Password: ${company_password}
 
         Please keep this information safe and do not share it with anyone.
-
+        Log In: https://revisionwebappfrontend.vercel.app
         Regards,
         Your OJT Monitoring Team
       `;

@@ -106,7 +106,7 @@ module.exports = (db) => {
         Please keep this information safe and do not share it with anyone.
         Download our app in the link below to get started:
         
-       ANDROID: https://drive.google.com/file/d/1TituXQ4U_RWohjKSP93hMAzIi234Lm8o/view?usp=sharing
+       ANDROID: https://drive.google.com/file/d/1gOWbWq7llwg0plMRLtevwtLPNUbqborr/view?usp=sharing
 
 
         Regards,
